@@ -1,0 +1,24 @@
+#Some updates to the "default" config file in nginx to support LEMP and MTLS (mutual TLS - client certs for authenticaion)
+
+server {
+    listen        443;
+    root	/var/www/html/mysite;
+    ssl on;
+    server_name www.example.com;
+    ssl_certificate      /etc/nginx/certs/www.examle.com.cert.pem;
+    ssl_certificate_key  /etc/nginx/certs/www.example.com.key;
+    ssl_client_certificate /etc/nginx/certs/ca-chain.cert.pem;    #The signer of the client certs
+    ssl_verify_depth 2;   #This allows an intermediate CA cert to be used
+    ssl_verify_client on;
+    location / {
+	index index.php index.html;
+	try_files $uri $uri/ =404;
+    }
+	# Original from DigitalOcean community tutorial for LEMP
+        location ~ \.php$ {
+        fastcgi_pass   unix:/var/run/php5-fpm.sock;
+        fastcgi_index  index.php;
+        fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+        include        fastcgi_params;
+        }
+}
